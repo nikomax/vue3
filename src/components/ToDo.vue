@@ -1,7 +1,7 @@
 <template>
   <div class="todo-app">
     <div class="todo__input">
-      <input type="text" v-model="inputValue">
+      <input type="text" v-model="inputValue" v-on:keyup.enter="addTodo">
       <p>{{inputValue}}</p>
     </div>
     <div class="todo__list">
@@ -12,7 +12,7 @@
 
 <script>
 import ToDoItem from './ToDoItem'
-
+let prevId = 3
 export default {
   components: {ToDoItem},
   name: 'ToDo',
@@ -36,7 +36,13 @@ export default {
   },
   methods: {
     deleteTodo (id) {
-      console.log(id)
+      let index = this.list.findIndex(x => x.id === id)
+      this.list.splice(index, 1)
+    },
+    addTodo () {
+      prevId++
+      this.list.push({id: prevId, title: this.inputValue})
+      console.log(prevId)
     }
   }
 }
