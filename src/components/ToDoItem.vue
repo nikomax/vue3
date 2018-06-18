@@ -1,7 +1,7 @@
 <template>
   <div class="todo-item" :id="todoId">
     {{todoText}}
-    <button @click="deleteTodo">x</button>
+    <button class="todo-item__remove" @click="deleteTodo">x</button>
   </div>
 </template>
 
@@ -26,6 +26,21 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="sass">
+.todo-item
+  width: 100%
+  align-items: center
+  justify-content: space-between
+  display: flex
+  padding: 10px
+  cursor: pointer
+  &:nth-child(2n+1)
+    background-color: #f1f1f1
+  &__remove
+    display: block
+    background-color: transparent
+    border-radius: 3px
+    border: 1px solid #132880
+    cursor: pointer
 
 </style>

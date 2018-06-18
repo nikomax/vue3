@@ -1,8 +1,7 @@
 <template>
-  <div class="todo-app">
+  <div class="todo">
     <div class="todo__input">
       <input type="text" v-model="inputValue" v-on:keyup.enter="addTodo">
-      <p>{{inputValue}}</p>
     </div>
     <div class="todo__list">
       <to-do-item v-for="item in list" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo"/>
@@ -42,12 +41,38 @@ export default {
     addTodo () {
       prevId++
       this.list.push({id: prevId, title: this.inputValue})
-      console.log(prevId)
+      this.inputValue = ''
     }
   }
 }
 </script>
 
-<style>
+<style lang="sass">
+*
+  box-sizing: border-box
 
+body
+  background-color: #fff
+
+.todo
+  box-shadow: 0 0 5px rgba(0,0,0,0.5)
+  width: 300px
+  background-color: #fff
+  margin: 0 auto
+  padding: 20px 0
+  text-align: left
+  border-radius: 5px
+  &__input
+    padding: 0 20px
+    width: 100%
+    height: 30px
+    margin-bottom: 30px
+    input
+      padding: 0 10px
+      display: block
+      height: 100%
+      width: 100%
+      border: none
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5)
+      border-radius: 5px
 </style>
