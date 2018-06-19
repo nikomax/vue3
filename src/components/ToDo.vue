@@ -4,7 +4,12 @@
       <input type="text" v-model="inputValue" v-on:keyup.enter="addTodo">
     </div>
     <div class="todo__list">
-      <to-do-item v-for="item in list" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo"/>
+      <to-do-item :active="item.active" v-for="item in list" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
+    </div>
+    <div class="todo__filters" v-if="list.length">
+      <button class="btn">All</button>
+      <button class="btn">Active</button>
+      <button class="btn">Done</button>
     </div>
   </div>
 </template>
@@ -23,15 +28,18 @@ export default {
       list: [
         {
           id: '1',
-          title: 'Buy meal'
+          title: 'Buy meal',
+          active: true
         },
         {
           id: '2',
-          title: 'Eat'
+          title: 'Eat',
+          active: true
         },
         {
           id: '3',
-          title: 'Go to the bed'
+          title: 'Go to the bed',
+          active: true
         }]
     }
   },
@@ -41,8 +49,14 @@ export default {
       this.list.splice(index, 1)
     },
     addTodo () {
-      this.list.push({id: ID(), title: this.inputValue})
-      this.inputValue = ''
+      if (this.inputValue.length > 0) {
+        this.list.push({id: ID(), title: this.inputValue, active: true})
+        this.inputValue = ''
+      }
+    },
+    changeStatus (id) {
+      let index = this.list.findIndex(x => x.id === id)
+      this.list[index].active = !this.list[index].active
     }
   }
 }

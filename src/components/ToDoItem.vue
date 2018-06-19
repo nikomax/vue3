@@ -1,6 +1,8 @@
 <template>
-  <div class="todo-item" :id="todoId">
-    {{todoText}}
+  <div class="todo-item" :id="todoId" :class="{'is-done': !active}">
+    <div class="todo-item__text"  @click="changeStatus">
+      {{todoText}}
+    </div>
     <button class="todo-item__remove" @click="deleteTodo">x</button>
   </div>
 </template>
@@ -16,11 +18,17 @@ export default {
     todoId: {
       type: String,
       required: true
+    },
+    active: {
+      type: Boolean
     }
   },
   methods: {
     deleteTodo () {
       this.$emit('delete', this.todoId)
+    },
+    changeStatus () {
+      this.$emit('change', this.todoId)
     }
   }
 }
@@ -32,11 +40,21 @@ export default {
   align-items: center
   justify-content: space-between
   display: flex
-  padding: 10px
+  position: relative
   cursor: pointer
   &:nth-child(2n+1)
     background-color: #f1f1f1
+  &.is-done
+    .todo-item__text
+      text-decoration: line-through
+  &__text
+    flex-grow: 1
+    padding: 10px
   &__remove
+    position: absolute
+    top: 50%
+    right: 10px
+    transform: translateY(-50%)
     display: block
     background-color: transparent
     border-radius: 3px
