@@ -14,7 +14,7 @@ export default {
       required: true
     },
     todoId: {
-      type: Number,
+      type: String,
       required: true
     }
   },

@@ -11,7 +11,9 @@
 
 <script>
 import ToDoItem from './ToDoItem'
-let prevId = 3
+let ID = function () {
+  return '_' + Math.random().toString(36).substr(2, 9)
+}
 export default {
   components: {ToDoItem},
   name: 'ToDo',
@@ -20,16 +22,16 @@ export default {
       inputValue: '',
       list: [
         {
-          id: 1,
-          title: 'Купить пожрать'
+          id: '1',
+          title: 'Buy meal'
         },
         {
-          id: 2,
-          title: 'Пожрать'
+          id: '2',
+          title: 'Eat'
         },
         {
-          id: 3,
-          title: 'Лечь спать'
+          id: '3',
+          title: 'Go to the bed'
         }]
     }
   },
@@ -39,8 +41,7 @@ export default {
       this.list.splice(index, 1)
     },
     addTodo () {
-      prevId++
-      this.list.push({id: prevId, title: this.inputValue})
+      this.list.push({id: ID(), title: this.inputValue})
       this.inputValue = ''
     }
   }
