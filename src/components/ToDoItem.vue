@@ -1,6 +1,7 @@
 <template>
-  <div class="todo-item" :id="todoId" :class="{'is-done': !active}">
-    <div class="todo-item__text"  @click="changeStatus">
+  <div class="todo-item" :id="todoId" :class="{'is-done': !active, 'is-edit': edit}">
+    <input class="todo-item__input" type="text" @keyup.enter="updateTodo">
+    <div class="todo-item__text"  @click="changeStatus" @dblclick="editTodo">
       {{todoText}}
     </div>
     <button class="todo-item__remove" @click="deleteTodo">x</button>
@@ -21,6 +22,9 @@ export default {
     },
     active: {
       type: Boolean
+    },
+    edit: {
+      type: Boolean
     }
   },
   methods: {
@@ -29,6 +33,12 @@ export default {
     },
     changeStatus () {
       this.$emit('change', this.todoId)
+    },
+    editTodo () {
+      this.$emit('edit', this.todoId)
+    },
+    updateTodo (e) {
+      this.$emit('changeInput', e.target.value, this.todoId)
     }
   }
 }
@@ -47,6 +57,15 @@ export default {
   &.is-done
     .todo-item__text
       text-decoration: line-through
+  &.is-edit
+    .todo-item__input
+      display: block
+    .todo-item__text
+      display: none
+  &__input
+    display: none
+    margin: 5px 10px
+    padding: 5px
   &__text
     flex-grow: 1
     padding: 10px

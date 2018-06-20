@@ -1,14 +1,14 @@
 <template>
   <div class="todo">
     <div class="todo__input">
-      <input type="text" v-model="inputValue" v-on:keyup.enter="addTodo">
+      <input type="text" v-model="inputValue" @keyup.enter="addTodo">
     </div>
     <div class="todo__actions" v-if="list.length">
       <button class="btn" @click="completeAll">Complete all</button>
       <button class="btn" @click="clearCompleted">Clear completed</button>
     </div>
     <div class="todo__list">
-      <to-do-item :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
+      <to-do-item @changeInput="updTodo" @edit="editTodoItem" :edit="item.edit" :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
     </div>
     <div class="todo__filters" v-if="list.length">
       <button class="btn" @click="sort='all'">All</button>
@@ -34,17 +34,20 @@ export default {
         {
           id: '1',
           title: 'Buy meal',
-          active: true
+          active: true,
+          edit: false
         },
         {
           id: '2',
           title: 'Eat',
-          active: true
+          active: true,
+          edit: false
         },
         {
           id: '3',
           title: 'Go to the bed',
-          active: true
+          active: true,
+          edit: false
         }]
     }
   },
@@ -55,7 +58,7 @@ export default {
     },
     addTodo () {
       if (this.inputValue.length > 0) {
-        this.list.push({id: ID(), title: this.inputValue, active: true})
+        this.list.push({id: ID(), title: this.inputValue, active: true, edit: false})
         this.inputValue = ''
       }
     },
@@ -70,6 +73,17 @@ export default {
     },
     clearCompleted () {
       this.list = this.list.filter(active => active.active === true)
+    },
+    editTodoItem (id) {
+      let index = this.list.findIndex(x => x.id === id)
+      this.list[index].edit = true
+    },
+    updTodo (value, id) {
+      let index = this.list.findIndex(x => x.id === id)
+      if (value.length > 0) {
+        this.list[index].title = value
+      }
+      this.list[index].edit = false
     }
   },
   computed: {
