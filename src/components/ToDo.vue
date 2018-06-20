@@ -3,7 +3,10 @@
     <div class="todo__input">
       <input type="text" v-model="inputValue" v-on:keyup.enter="addTodo">
     </div>
-    <button class="btn" v-if="list.length" @click="completeAll">Complete all</button>
+    <div class="todo__actions" v-if="list.length">
+      <button class="btn" @click="completeAll">Complete all</button>
+      <button class="btn" @click="clearCompleted">Clear completed</button>
+    </div>
     <div class="todo__list">
       <to-do-item :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
     </div>
@@ -64,6 +67,9 @@ export default {
       this.list.forEach(function (todoItem) {
         todoItem.active = false
       })
+    },
+    clearCompleted () {
+      this.list = this.list.filter(active => active.active === true)
     }
   },
   computed: {
@@ -94,7 +100,7 @@ body
   width: 300px
   background-color: #fff
   margin: 0 auto
-  padding: 20px 0
+  padding: 20px 0 10px
   text-align: left
   border-radius: 5px
   &__input
@@ -110,4 +116,13 @@ body
       border: none
       box-shadow: 0 1px 3px rgba(0,0,0,0.5)
       border-radius: 5px
+  &__filters
+    display: flex
+    justify-content: space-between
+    padding: 20px
+  &__actions
+    margin-bottom: 20px
+    padding: 0 20px
+    display: flex
+    justify-content: space-between
 </style>
