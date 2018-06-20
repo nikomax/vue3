@@ -3,13 +3,14 @@
     <div class="todo__input">
       <input type="text" v-model="inputValue" v-on:keyup.enter="addTodo">
     </div>
+    <button class="btn" v-if="list.length" @click="completeAll">Complete all</button>
     <div class="todo__list">
-      <to-do-item :active="item.active" v-for="item in list" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
+      <to-do-item :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
     </div>
     <div class="todo__filters" v-if="list.length">
-      <button class="btn">All</button>
-      <button class="btn">Active</button>
-      <button class="btn">Done</button>
+      <button class="btn" @click="sort='all'">All</button>
+      <button class="btn" @click="sort='active'">Active</button>
+      <button class="btn" @click="sort='done'">Done</button>
     </div>
   </div>
 </template>
@@ -25,6 +26,7 @@ export default {
   data () {
     return {
       inputValue: '',
+      sort: 'all',
       list: [
         {
           id: '1',
@@ -57,6 +59,24 @@ export default {
     changeStatus (id) {
       let index = this.list.findIndex(x => x.id === id)
       this.list[index].active = !this.list[index].active
+    },
+    completeAll () {
+      this.list.forEach(function (todoItem) {
+        todoItem.active = false
+      })
+    }
+  },
+  computed: {
+    sortTodos: function () {
+      let sortedTodo
+      if (this.sort === 'all') {
+        sortedTodo = this.list
+      } else if (this.sort === 'active') {
+        sortedTodo = this.list.filter(active => active.active === true)
+      } else if (this.sort === 'done') {
+        sortedTodo = this.list.filter(active => active.active === false)
+      }
+      return sortedTodo
     }
   }
 }
