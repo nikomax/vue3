@@ -20,6 +20,9 @@
 
 <script>
 import ToDoItem from './ToDoItem'
+import axios from 'axios'
+const listJson = 'http://localhost:3000/list'
+
 let ID = function () {
   return '_' + Math.random().toString(36).substr(2, 9)
 }
@@ -30,49 +33,51 @@ export default {
     return {
       inputValue: '',
       sort: 'all',
-      list: [
-        {
-          id: '1',
-          title: 'Buy meal',
-          active: true,
-          edit: false
-        },
-        {
-          id: '2',
-          title: 'Eat',
-          active: true,
-          edit: false
-        },
-        {
-          id: '3',
-          title: 'Go to the bed',
-          active: true,
-          edit: false
-        }]
+      list: []
     }
   },
   methods: {
     deleteTodo (id) {
       let index = this.list.findIndex(x => x.id === id)
       this.list.splice(index, 1)
+      axios.delete(`${listJson}/${id}`)
     },
     addTodo () {
       if (this.inputValue.length > 0) {
-        this.list.push({id: ID(), title: this.inputValue, active: true, edit: false})
+        const newTodoItem = {
+          id: ID(),
+          title: this.inputValue,
+          active: true,
+          edit: false
+        }
+        // this.list.push({id: ID(), title: this.inputValue, active: true, edit: false})
+        axios.post(listJson, newTodoItem).then((response) => {
+        }).catch((error) => {
+          alert(error)
+        })
+        this.list.push(newTodoItem)
         this.inputValue = ''
       }
     },
     changeStatus (id) {
       let index = this.list.findIndex(x => x.id === id)
       this.list[index].active = !this.list[index].active
+      axios.put(`${listJson}/${id}`, this.list[index])
     },
     completeAll () {
       this.list.forEach(function (todoItem) {
         todoItem.active = false
+        axios.put(`${listJson}/${todoItem.id}`, todoItem)
       })
     },
     clearCompleted () {
-      this.list = this.list.filter(active => active.active === true)
+      this.list = this.list.filter((active) => {
+        if (active.active === false) {
+          axios.delete(`${listJson}/${active.id}`)
+          return false
+        }
+        return true
+      })
     },
     editTodoItem (id) {
       let index = this.list.findIndex(x => x.id === id)
@@ -82,6 +87,7 @@ export default {
       let index = this.list.findIndex(x => x.id === id)
       if (value.length > 0) {
         this.list[index].title = value
+        axios.put(`${listJson}/${id}`, this.list[index])
       }
       this.list[index].edit = false
     }
@@ -98,6 +104,16 @@ export default {
       }
       return sortedTodo
     }
+  },
+  created () {
+    let that = this
+    axios.get(listJson)
+      .then(function (response) {
+        that.list = Object.assign([], response.data)
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
   }
 }
 </script>

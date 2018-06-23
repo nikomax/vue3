@@ -1,0 +1,22 @@
+{
+  "list": [
+    {
+      "id": "_f4l0c13x2",
+      "title": "Earn money",
+      "active": true,
+      "edit": false
+    },
+    {
+      "id": "_tqkckxupk",
+      "title": "Buy macBook Pro",
+      "active": true,
+      "edit": false
+    },
+    {
+      "id": "_xv126hyjv",
+      "title": "Write code everywhere",
+      "active": true,
+      "edit": false
+    }
+  ]
+}
