@@ -52,6 +52,7 @@ export default {
   display: flex
   position: relative
   cursor: pointer
+  transition: all 1s
   &:nth-child(2n+1)
     background-color: #f1f1f1
   &.is-done

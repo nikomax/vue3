@@ -7,9 +7,9 @@
       <button class="btn" @click="completeAll">Complete all</button>
       <button class="btn" @click="clearCompleted">Clear completed</button>
     </div>
-    <div class="todo__list">
+    <transition-group name="list" tag="p" class="todo__list">
       <to-do-item @changeInput="updTodo" @edit="editTodoItem" :edit="item.edit" :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
-    </div>
+    </transition-group>
     <div class="todo__filters" v-if="list.length">
       <button class="btn" @click="sort='all'">All</button>
       <button class="btn" @click="sort='active'">Active</button>
@@ -146,6 +146,9 @@ body
       border: none
       box-shadow: 0 1px 3px rgba(0,0,0,0.5)
       border-radius: 5px
+  &__list
+    display: flex
+    flex-direction: column
   &__filters
     display: flex
     justify-content: space-between
@@ -155,4 +158,10 @@ body
     padding: 0 20px
     display: flex
     justify-content: space-between
+  .list-enter-active, .list-leave-active
+    transition: all 1s
+  .list-enter, .list-leave-to
+    position: absolute
+    opacity: 0
+    transform: translateY(30px)
 </style>
