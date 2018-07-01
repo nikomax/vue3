@@ -7,7 +7,12 @@
       <button class="btn" @click="completeAll">Complete all</button>
       <button class="btn" @click="clearCompleted">Clear completed</button>
     </div>
-    <transition-group name="list" tag="p" class="todo__list">
+    <transition-group name="list" tag="div"
+                      class="todo__list"
+                      v-bind:css="false"
+                      v-on:before-leave="beforeLeave"
+                      v-on:enter="enter"
+                      v-on:leave="leave">
       <to-do-item @changeInput="updTodo" @edit="editTodoItem" :edit="item.edit" :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
     </transition-group>
     <div class="todo__filters" v-if="list.length">
@@ -21,6 +26,7 @@
 <script>
 import ToDoItem from './ToDoItem'
 import axios from 'axios'
+import { TimelineMax } from 'gsap'
 const listJson = 'http://localhost:3000/list'
 
 let ID = function () {
@@ -37,6 +43,17 @@ export default {
     }
   },
   methods: {
+    beforeLeave: function (el) {
+      el.style.position = 'absolute'
+    },
+    enter: function (el, done) {
+      let tl = new TimelineMax({onComplete: done})
+      tl.fromTo(el, 0.3, {y: -50, opacity: 0, rotation: -180}, {y: 0, opacity: 1, rotation: 0})
+    },
+    leave: function (el, done) {
+      let tl = new TimelineMax({onComplete: done})
+      tl.fromTo(el, 0.3, {y: 0}, {y: 50, opacity: 0, rotation: 180})
+    },
     deleteTodo (id) {
       let index = this.list.findIndex(x => x.id === id)
       this.list.splice(index, 1)
@@ -149,6 +166,8 @@ body
   &__list
     display: flex
     flex-direction: column
+    position: relative
+    overflow: hidden
   &__filters
     display: flex
     justify-content: space-between
@@ -158,10 +177,10 @@ body
     padding: 0 20px
     display: flex
     justify-content: space-between
-  .list-enter-active, .list-leave-active
-    transition: all 1s
-  .list-enter, .list-leave-to
-    position: absolute
-    opacity: 0
-    transform: translateY(30px)
+  /*.list-enter-active, .list-leave-active*/
+    /*transition: all 1s*/
+  /*.list-enter, .list-leave-to*/
+    /*position: absolute*/
+    /*opacity: 0*/
+    /*transform: translateY(30px)*/
 </style>

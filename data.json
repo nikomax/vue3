@@ -1,50 +1,20 @@
 {
   "list": [
     {
-      "id": "_txn6htgaa",
-      "title": "ыва",
-      "active": false,
-      "edit": false
-    },
-    {
-      "id": "_4r1cm4wgk",
-      "title": "f",
+      "id": "_5zhtfzbh0",
+      "title": "first",
       "active": true,
       "edit": false
     },
     {
-      "id": "_xj4qrlrin",
-      "title": "dfgsd",
+      "id": "_5z0c4mzbw",
+      "title": "second",
       "active": true,
       "edit": false
     },
     {
-      "id": "_pt5cs4drq",
-      "title": "fs",
-      "active": true,
-      "edit": false
-    },
-    {
-      "id": "_1d1cxi998",
-      "title": "df",
-      "active": true,
-      "edit": false
-    },
-    {
-      "id": "_wghgwhuxx",
-      "title": "sd",
-      "active": true,
-      "edit": false
-    },
-    {
-      "id": "_ccz3r2m8i",
-      "title": "f",
-      "active": true,
-      "edit": false
-    },
-    {
-      "id": "_a29pt6bnv",
-      "title": "sdf",
+      "id": "_q0krl8zld",
+      "title": "third",
       "active": true,
       "edit": false
     }
