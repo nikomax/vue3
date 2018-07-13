@@ -1,8 +1,8 @@
 <template>
-  <div class="todo-item" :id="todoId" :class="{'is-done': !active, 'is-edit': edit}">
+  <div class="todo-item"  :class="{'is-done': !item.active, 'is-edit': item.edit}">
     <input class="todo-item__input" type="text" @keyup.enter="updateTodo">
     <div class="todo-item__text"  @click="changeStatus" @dblclick="editTodo">
-      {{todoText}}
+      {{item.title}}
     </div>
     <button class="todo-item__remove" @click="deleteTodo">x</button>
   </div>
@@ -12,33 +12,22 @@
 export default {
   name: 'toDoItem',
   props: {
-    todoText: {
-      type: String,
-      required: true
-    },
-    todoId: {
-      type: String,
-      required: true
-    },
-    active: {
-      type: Boolean
-    },
-    edit: {
-      type: Boolean
+    item: {
+      type: Object
     }
   },
   methods: {
     deleteTodo () {
-      this.$emit('delete', this.todoId)
+      this.$emit('delete', this.$vnode.key)
     },
     changeStatus () {
-      this.$emit('change', this.todoId)
+      this.$emit('change', this.$vnode.key)
     },
     editTodo () {
-      this.$emit('edit', this.todoId)
+      this.$emit('edit', this.$vnode.key)
     },
     updateTodo (e) {
-      this.$emit('changeInput', e.target.value, this.todoId)
+      this.$emit('changeInput', e.target.value, this.$vnode.key)
     }
   }
 }

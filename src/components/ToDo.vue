@@ -3,7 +3,7 @@
     <div class="todo__input">
       <input type="text" v-model="inputValue" @keyup.enter="addTodo">
     </div>
-    <div class="todo__actions" v-if="list.length">
+    <div class="todo__actions" v-if="keys.length">
       <button class="btn" @click="completeAll">Complete all</button>
       <button class="btn" @click="clearCompleted">Clear completed</button>
     </div>
@@ -13,9 +13,9 @@
                       v-on:before-leave="beforeLeave"
                       v-on:enter="enter"
                       v-on:leave="leave">
-      <to-do-item @changeInput="updTodo" @edit="editTodoItem" :edit="item.edit" :active="item.active" v-for="item in sortTodos" :todo-text="item.title" :key="item.id" :todo-id="item.id" @delete="deleteTodo" @change="changeStatus"/>
+      <to-do-item @changeInput="updTodo" @edit="editTodoItem" :item="list[key]" v-for="key in keys" :key="key" @delete="deleteTodo" @change="changeStatus"/>
     </transition-group>
-    <div class="todo__filters" v-if="list.length">
+    <div class="todo__filters" v-if="keys.length">
       <button class="btn" @click="sort='all'">All</button>
       <button class="btn" @click="sort='active'">Active</button>
       <button class="btn" @click="sort='done'">Done</button>
@@ -27,7 +27,7 @@
 import ToDoItem from './ToDoItem'
 import axios from 'axios'
 import { TimelineMax } from 'gsap'
-const listJson = 'http://localhost:3000/list'
+const listJson = 'https://vuetodo-test.firebaseio.com/list.json'
 
 let ID = function () {
   return '_' + Math.random().toString(36).substr(2, 9)
@@ -39,7 +39,8 @@ export default {
     return {
       inputValue: '',
       sort: 'all',
-      list: []
+      list: [],
+      keys: []
     }
   },
   methods: {
@@ -48,16 +49,16 @@ export default {
     },
     enter: function (el, done) {
       let tl = new TimelineMax({onComplete: done})
-      tl.fromTo(el, 0.3, {y: -50, opacity: 0, rotation: -180}, {y: 0, opacity: 1, rotation: 0})
+      tl.fromTo(el, 0.3, {y: -50, opacity: 0}, {y: 0, opacity: 1})
     },
     leave: function (el, done) {
       let tl = new TimelineMax({onComplete: done})
-      tl.fromTo(el, 0.3, {y: 0}, {y: 50, opacity: 0, rotation: 180})
+      tl.fromTo(el, 0.3, {y: 0}, {y: 50, opacity: 0})
     },
     deleteTodo (id) {
-      let index = this.list.findIndex(x => x.id === id)
-      this.list.splice(index, 1)
-      axios.delete(`${listJson}/${id}`)
+      let index = this.keys.findIndex(x => x === id)
+      this.keys.splice(index, 1)
+      axios.delete(`https://vuetodo-test.firebaseio.com/list/${id}.json`)
     },
     addTodo () {
       if (this.inputValue.length > 0) {
@@ -67,46 +68,45 @@ export default {
           active: true,
           edit: false
         }
-        // this.list.push({id: ID(), title: this.inputValue, active: true, edit: false})
-        axios.post(listJson, newTodoItem).then((response) => {
+        axios.post(listJson, newTodoItem).then(({data}) => {
+          this.list[data.name] = newTodoItem
+          this.keys.push(data.name)
         }).catch((error) => {
           alert(error)
         })
-        this.list.push(newTodoItem)
         this.inputValue = ''
       }
     },
     changeStatus (id) {
-      let index = this.list.findIndex(x => x.id === id)
-      this.list[index].active = !this.list[index].active
-      axios.put(`${listJson}/${id}`, this.list[index])
+      this.list[id].active = !this.list[id].active
+      axios.put(`https://vuetodo-test.firebaseio.com/list/${id}.json`, this.list[id])
     },
     completeAll () {
-      this.list.forEach(function (todoItem) {
-        todoItem.active = false
-        axios.put(`${listJson}/${todoItem.id}`, todoItem)
+      let that = this
+      this.keys.forEach(function (todoItem) {
+        that.list[todoItem].active = false
+        axios.put(`https://vuetodo-test.firebaseio.com/list/${todoItem}.json`, that.list[todoItem])
       })
     },
     clearCompleted () {
-      this.list = this.list.filter((active) => {
-        if (active.active === false) {
-          axios.delete(`${listJson}/${active.id}`)
+      let that = this
+      this.keys = this.keys.filter((active) => {
+        if (that.list[active].active === false) {
+          axios.delete(`https://vuetodo-test.firebaseio.com/list/${active}.json`)
           return false
         }
         return true
       })
     },
     editTodoItem (id) {
-      let index = this.list.findIndex(x => x.id === id)
-      this.list[index].edit = true
+      this.list[id].edit = true
     },
     updTodo (value, id) {
-      let index = this.list.findIndex(x => x.id === id)
       if (value.length > 0) {
-        this.list[index].title = value
-        axios.put(`${listJson}/${id}`, this.list[index])
+        this.list[id].title = value
+        axios.put(`https://vuetodo-test.firebaseio.com/list/${id}.json`, this.list[id])
       }
-      this.list[index].edit = false
+      this.list[id].edit = false
     }
   },
   computed: {
@@ -126,7 +126,10 @@ export default {
     let that = this
     axios.get(listJson)
       .then(function (response) {
-        that.list = Object.assign([], response.data)
+        that.list = response.data
+        console.log(that.list)
+        that.keys = Object.keys(that.list)
+        // console.log(Object.keys(that.list))
       })
       .catch(function (error) {
         console.log(error)
