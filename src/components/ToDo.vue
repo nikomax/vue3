@@ -7,13 +7,19 @@
       <button class="btn" @click="completeAll">Complete all</button>
       <button class="btn" @click="clearCompleted">Clear completed</button>
     </div>
-    <transition-group name="list" tag="div"
+    <transition-group v-infinite-scroll="loadMore" name="list" tag="div"
                       class="todo__list"
                       v-bind:css="false"
                       v-on:before-leave="beforeLeave"
                       v-on:enter="enter"
                       v-on:leave="leave">
-      <to-do-item @changeInput="updTodo" @edit="editTodoItem" :item="list[key]" v-for="key in keys" :key="key" @delete="deleteTodo" @change="changeStatus"/>
+      <to-do-item v-rainbow
+                  @changeInput="updTodo"
+                  @edit="editTodoItem"
+                  :item="list[key]"
+                  v-for="key in sortTodos"
+                  :key="key" @delete="deleteTodo"
+                  @change="changeStatus"/>
     </transition-group>
     <div class="todo__filters" v-if="keys.length">
       <button class="btn" @click="sort='all'">All</button>
@@ -40,10 +46,23 @@ export default {
       inputValue: '',
       sort: 'all',
       list: [],
-      keys: []
+      keys: [],
+      busy: false
     }
   },
   methods: {
+    loadMore: function () {
+      let self = this
+      self.busy = true
+      console.log('loading... ' + new Date())
+      setTimeout(function () {
+        let app = document.querySelector('.todo__list')
+        let height = app.clientHeight
+        app.style.height = height + 300 + 'px'
+        console.log('end... ' + new Date())
+        self.busy = false
+      }, 1000)
+    },
     beforeLeave: function (el) {
       el.style.position = 'absolute'
     },
@@ -111,13 +130,14 @@ export default {
   },
   computed: {
     sortTodos: function () {
+      let that = this
       let sortedTodo
       if (this.sort === 'all') {
-        sortedTodo = this.list
+        sortedTodo = this.keys
       } else if (this.sort === 'active') {
-        sortedTodo = this.list.filter(active => active.active === true)
+        sortedTodo = this.keys.filter(active => that.list[active].active === true)
       } else if (this.sort === 'done') {
-        sortedTodo = this.list.filter(active => active.active === false)
+        sortedTodo = this.keys.filter(active => that.list[active].active === false)
       }
       return sortedTodo
     }
