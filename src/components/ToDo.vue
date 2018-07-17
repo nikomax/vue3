@@ -16,8 +16,8 @@
       <to-do-item v-rainbow
                   @changeInput="updTodo"
                   @edit="editTodoItem"
-                  :item="list[key]"
-                  v-for="key in sortTodos"
+                  :item="$store.state.list[key]"
+                  v-for="key in $store.commit('sortTodos')"
                   :key="key" @delete="deleteTodo"
                   @change="changeStatus"/>
     </transition-group>
@@ -46,8 +46,8 @@ export default {
     return {
       inputValue: '',
       sort: 'all',
-      list: [],
-      keys: [],
+      // list: [],
+      // keys: [],
       busy: false
     }
   },
@@ -129,33 +129,9 @@ export default {
       this.list[id].edit = false
     }
   },
-  computed: {
-    sortTodos: function () {
-      let that = this
-      let sortedTodo
-      if (this.sort === 'all') {
-        sortedTodo = this.keys
-      } else if (this.sort === 'active') {
-        sortedTodo = this.keys.filter(active => that.list[active].active === true)
-      } else if (this.sort === 'done') {
-        sortedTodo = this.keys.filter(active => that.list[active].active === false)
-      }
-      return sortedTodo
-    }
-  },
-  created () {
-    let that = this
-    axios.get(listJson)
-      .then(function (response) {
-        that.list = response.data
-        console.log(that.list)
-        that.keys = Object.keys(that.list)
-        // console.log(Object.keys(that.list))
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
-  }
+  computed: mapState([
+    'list', 'keys'
+  ])
 }
 </script>
 
