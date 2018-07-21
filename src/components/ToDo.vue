@@ -3,9 +3,14 @@
     <div class="todo__input">
       <input type="text" v-model="inputValue" @keyup.enter="addTodo">
     </div>
-    <div class="todo__actions" v-if="keys.length">
-      <button class="btn" @click="completeAll">Complete all</button>
-      <button class="btn" @click="clearCompleted">Clear completed</button>
+    <div class="todo__filters" v-if="$store.state.keys.length">
+      <button class="btn" @click="$store.state.sort='all'">All</button>
+      <button class="btn" @click="$store.state.sort='active'">Active</button>
+      <button class="btn" @click="$store.state.sort='done'">Done</button>
+    </div>
+    <div class="todo__actions" v-if="$store.state.keys.length">
+      <button class="btn" @click="$store.commit('completeAll')">Complete all</button>
+      <button class="btn" @click="$store.commit('clearCompleted')">Clear completed</button>
     </div>
     <transition-group v-infinite-scroll="loadMore" name="list" tag="div"
                       class="todo__list"
@@ -15,26 +20,20 @@
                       v-on:leave="leave">
       <to-do-item v-rainbow
                   @changeInput="updTodo"
-                  @edit="editTodoItem"
-                  :item="list[key]"
+                  @edit="$store.commit('editTodoItem', key)"
+                  :item="$store.state.list[key]"
                   v-for="key in sortTodos"
-                  :key="key" @delete="deleteTodo"
-                  @change="changeStatus"/>
+                  :key="key" @delete="$store.commit('delete', key)"
+                  @change="$store.commit('changeStatus', key)"/>
     </transition-group>
-    <div class="todo__filters" v-if="keys.length">
-      <button class="btn" @click="sort='all'">All</button>
-      <button class="btn" @click="sort='active'">Active</button>
-      <button class="btn" @click="sort='done'">Done</button>
-    </div>
+
   </div>
 </template>
 
 <script>
 import ToDoItem from './ToDoItem'
-import axios from 'axios'
 import { TimelineMax } from 'gsap'
 import { mapState } from 'vuex'
-const listJson = 'https://vuetodo-test.firebaseio.com/list.json'
 
 let ID = function () {
   return '_' + Math.random().toString(36).substr(2, 9)
@@ -45,9 +44,6 @@ export default {
   data () {
     return {
       inputValue: '',
-      sort: 'all',
-      list: [],
-      keys: [],
       busy: false
     }
   },
@@ -75,11 +71,6 @@ export default {
       let tl = new TimelineMax({onComplete: done})
       tl.fromTo(el, 0.3, {y: 0}, {y: 50, opacity: 0})
     },
-    deleteTodo (id) {
-      let index = this.keys.findIndex(x => x === id)
-      this.keys.splice(index, 1)
-      axios.delete(`https://vuetodo-test.firebaseio.com/list/${id}.json`)
-    },
     addTodo () {
       if (this.inputValue.length > 0) {
         const newTodoItem = {
@@ -88,77 +79,34 @@ export default {
           active: true,
           edit: false
         }
-        axios.post(listJson, newTodoItem).then(({data}) => {
-          this.list[data.name] = newTodoItem
-          this.keys.push(data.name)
-        }).catch((error) => {
-          alert(error)
-        })
+        this.$store.commit('add', newTodoItem)
         this.inputValue = ''
       }
     },
-    changeStatus (id) {
-      this.list[id].active = !this.list[id].active
-      axios.put(`https://vuetodo-test.firebaseio.com/list/${id}.json`, this.list[id])
-    },
-    completeAll () {
-      let that = this
-      this.keys.forEach(function (todoItem) {
-        that.list[todoItem].active = false
-        axios.put(`https://vuetodo-test.firebaseio.com/list/${todoItem}.json`, that.list[todoItem])
-      })
-    },
-    clearCompleted () {
-      let that = this
-      this.keys = this.keys.filter((active) => {
-        if (that.list[active].active === false) {
-          axios.delete(`https://vuetodo-test.firebaseio.com/list/${active}.json`)
-          return false
-        }
-        return true
-      })
-    },
-    editTodoItem (id) {
-      this.list[id].edit = true
-    },
     updTodo (value, id) {
-      if (value.length > 0) {
-        this.list[id].title = value
-        axios.put(`https://vuetodo-test.firebaseio.com/list/${id}.json`, this.list[id])
-      }
-      this.list[id].edit = false
+      this.$store.commit('updItem', {value, id})
     }
   },
   computed: {
     ...mapState({
-      bla: 'list', lol: 'keys'
+      list: 'list', keys: 'keys', sort: 'sort'
     }),
     sortTodos () {
       let that = this
       let sortedTodo
-      if (this.sort === 'all') {
-        sortedTodo = this.keys
-      } else if (this.sort === 'active') {
-        sortedTodo = this.keys.filter(active => that.list[active].active === true)
-      } else if (this.sort === 'done') {
-        sortedTodo = this.keys.filter(active => that.list[active].active === false)
+      if (that.sort === 'all') {
+        sortedTodo = that.keys
+      } else if (that.sort === 'active') {
+        sortedTodo = that.keys.filter(active => that.list[active].active === true)
+      } else if (that.sort === 'done') {
+        sortedTodo = that.keys.filter(active => that.list[active].active === false)
       }
       return sortedTodo
     }
   },
   created () {
-    console.log(this.$store)
+    console.log(this.$store.state.sortedTodo)
     this.$store.dispatch('createList')
-    let that = this
-    axios.get(listJson)
-      .then(function (response) {
-        that.list = response.data
-        console.log(that.list)
-        that.keys = Object.keys(that.list)
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
   }
 
 }
@@ -200,7 +148,7 @@ body
   &__filters
     display: flex
     justify-content: space-between
-    padding: 20px
+    padding: 0 20px 20px
   &__actions
     margin-bottom: 20px
     padding: 0 20px
